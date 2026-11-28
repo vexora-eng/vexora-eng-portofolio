@@ -309,6 +309,32 @@ async function loadReviews(){if(!API)return;
     window.__sig=sig;if(changed||document.querySelector('.empty'))render();
   }catch{window.__ld=false;if(document.querySelector('.empty'))render()}
 }
+addEventListener('hashchange',()=>{scrollTo(0,0);render()});
+function modal(html,big){
+  $('#ui').innerHTML=`<div class="ov" data-close="1"><div class="dlg${big?' big':''}">${html}</div></div>`;
+}
+const close=()=>{$('#ui').innerHTML=''};
+
+function embed(u){
+  let m=u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
+  if(m)return `https://www.youtube-nocookie.com/embed/${m[1]}`;
+  m=u.match(/vimeo\.com\/(\d+)/);
+  return m?`https://player.vimeo.com/video/${m[1]}`:'';
+}
+function open(w){
+  const u=safe(w.url);
+  if(w.kind==='link'||w.kind==='file'){window.open(u,'_blank','noopener');return}
+  let inner='';
+  if(w.kind==='image')inner=`<img src="${esc(u)}" alt="${esc(w.title)}">`;
+  else if(w.up)inner=`<video src="${esc(u)}" controls autoplay playsinline></video>`;
+  else{const e=embed(w.url);inner=e?`<iframe src="${e}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>`:''}
+  modal(inner+`<div class="row"><a class="btn" href="${esc(u)}" target="_blank" rel="noopener">Відкрити окремо</a><button class="ghost" data-close="1">Закрити</button></div>`,true);
+}
+
+function loginForm(){modal(`<h2>Вхід для власника</h2><form id="l"><label>Пароль</label><input name="pw" type="password" autocomplete="current-password" required autofocus><div class="msg" id="msg"></div><div class="row"><button type="button" class="ghost" data-close="1">Скасувати</button><button type="submit">Увійти</button></div></form>`)}
+const revFormHtml=(id,title,note)=>`<h2>${title}</h2><p class="hint">${note}</p><form id="${id}"><label>1. ${tt('Ім’я','Name')} *</label><input name="nm" required maxlength="60" placeholder="${tt('Наприклад: Олена','For example: Olena')}"><label>2. ${tt('Хто це або звідки (необов’язково)','Who you are (optional)')}</label><input name="role" maxlength="80" placeholder="${tt('Наприклад: власниця кав’ярні','For example: café owner')}"><label>3. ${tt('Відгук про роботу','Your review')} *</label><textarea name="tx" rows="4" required maxlength="800" placeholder="${tt('Що сподобалось у співпраці?','What did you like about working together?')}"></textarea><input name="hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px"><div class="hint">${tt('Так це виглядатиме на сайті:','This is how it will look:')}</div><figure class="svc rev" id="pv"></figure><div class="msg" id="msg"></div><div class="row"><button type="button" class="ghost" data-close="1">${tt('Скасувати','Cancel')}</button><button type="submit">${tt('Надіслати','Send')}</button></div></form>`;
+function updPv(f){const p=$('#pv');if(p&&f)p.innerHTML=revInner({name:f.nm.value||tt('Ім’я','Name'),role:f.role.value,text:f.tx.value||tt('Тут буде текст відгуку','Review text will appear here')})}
+function revForm(){modal(revFormHtml('r','Новий відгук','Додайте відгук клієнта: ім’я, за бажанням хто це, і сам текст.'));updPv($('#r'))}
 function pubRevForm(){modal(revFormHtml('cr',tt('Залишити відгук','Leave a review'),API?tt('Відгук з’явиться на сайті одразу.','Your review will appear on the site right away.'):tt('Відгук відкриється в Telegram — просто натисніть «Надіслати».','Your review will open in Telegram — just press “Send”.')));updPv($('#cr'))}
 document.addEventListener('input',e=>{const f=e.target.form;if(f&&(f.id==='r'||f.id==='cr'))updPv(f)});
 function addForm(w){
