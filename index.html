@@ -227,10 +227,10 @@ const ini=n=>String(n).split(/\s+/).map(x=>x[0]||'').join('').slice(0,2).toUpper
 const io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{threshold:.12});
 const tagList=()=>[...new Set(D.works.flatMap(w=>w.tags||[]))];
 const card=(w,i)=>`<article class="card" style="animation-delay:${i*70}ms" data-id="${esc(w.id)}"><div class="thumb">${thumb(w)}<span class="badge">${KIND[w.kind][1]}</span></div><div class="body"><h3>${esc(w.title)}</h3>${w.desc?`<p>${esc(w.desc)}</p>`:''}<div class="tags">${(w.tags||[]).map(t=>`<i>${esc(t)}</i>`).join('')}</div></div>${admin&&(!GH||API)?`<div class="adm-b"><button class="edt" data-edit="${esc(w.id)}">Редагувати</button><button class="del" data-del="${esc(w.id)}">Видалити</button></div>`:''}</article>`;
-const grid=l=>l.length?`<section class="grid">${l.map(card).join('')}</section>`:`<div class="empty">${admin?'Тут поки порожньо. Натисніть «Додати роботу» вгорі.':'Скоро тут з’являться роботи.'}</div>`;
+const grid=l=>l.length?`<section class="grid">${l.map(card).join('')}</section>`:`<div class="empty">${window.__ld?'Завантаження…':admin?'Тут поки порожньо. Натисніть «Додати роботу» вгорі.':'Скоро тут з’являться роботи.'}</div>`;
 const svcs=()=>lines(D.profile.services).map((l,i)=>{const [a,b]=l.split('|');return `<div class="svc rv"><em>0${i+1}</em><h3>${esc(a)}</h3><p>${esc(b||'')}</p></div>`}).join('');
 const revInner=r=>`<div class="rh"><span class="av">${esc(((r.name||'?').trim()[0]||'?').toUpperCase())}</span><div><b>${esc(r.name)}</b><small>${esc(r.role||'')}</small></div></div><p>${esc(r.text)}</p>`;
-const revCards=l=>l.length?`<div class="svcs">${l.map(r=>`<figure class="svc rv rev">${revInner(r)}${admin?`<button class="del2" data-delr="${esc(r.id)}">Видалити</button>`:''}</figure>`).join('')}</div>`:`<div class="empty">${admin&&!API?'Відгуків поки немає. Натисніть «+ Додати відгук» вгорі.':(API?'Відгуків поки немає. Станьте першим!':'Відгуків поки немає.')}</div>`;
+const revCards=l=>l.length?`<div class="svcs">${l.map(r=>`<figure class="svc rv rev">${revInner(r)}${admin?`<button class="del2" data-delr="${esc(r.id)}">Видалити</button>`:''}</figure>`).join('')}</div>`:`<div class="empty">${window.__ld?'Завантаження…':admin&&!API?'Відгуків поки немає. Натисніть «+ Додати відгук» вгорі.':(API?'Відгуків поки немає. Станьте першим!':'Відгуків поки немає.')}</div>`;
 const revs=()=>`<h2 class="sec rv">Відгуки клієнтів <span>${API?'<button data-pubrev="1">Залишити відгук</button>':''}<a href="#reviews">Усі →</a></span></h2>${revCards(D.reviews.slice(0,3))}`;
 function pReviews(){return `<h1 class="hl">Відгуки</h1><p class="lead">Що кажуть про мою роботу.</p>${API?'<div class="links" style="margin:18px 0 26px"><button data-pubrev="1">Залишити відгук</button></div>':''}${revCards(D.reviews)}`}
 function pHome(){
@@ -278,7 +278,7 @@ function render0(){
   fx();
 }
 
-const EN={"Головна": "Home", "Роботи": "Works", "Про мене": "About", "Послуги": "Services", "Контакти": "Contacts", "Привіт, я": "Hi, I’m", "Дивитись роботи →": "View works →", "Замовити проєкт": "Order a project", "робіт": "works", "напрямів": "topics", "послуг": "services", "Обрані роботи": "Featured works", "Усі роботи →": "All works →", "Що я роблю": "What I do", "Докладніше →": "More →", "Відгуки клієнтів": "Client reviews", "Є ідея? Зробімо це разом.": "Got an idea? Let’s make it together.", "Написати мені": "Message me", "Скоро тут з’являться роботи.": "Works will appear here soon.", "Сайти, відео та файли — усе, що я створив.": "Websites, videos and files — everything I’ve made.", "Усі": "All", "Такої роботи не знайдено.": "Work not found.", "← До всіх робіт": "← Back to all works", "← Усі роботи": "← All works", "Відкрити сайт ↗": "Open site ↗", "Відкрити файл ↗": "Open file ↗", "Відкрити окремо ↗": "Open separately ↗", "Мої роботи →": "My works →", "Зв’язатися": "Get in touch", "Навички": "Skills", "Як я працюю": "How I work", "Потрібен сайт чи лендинг?": "Need a website or a landing page?", "Ім’я": "Name", "Чим займаюсь": "What I do", "Телефон": "Phone", "Робіт у портфоліо": "Works in portfolio", "Те, з чим я можу допомогти вашому проєкту.": "What I can help your project with.", "Обговорімо ваш проєкт": "Let’s discuss your project", "Розкажіть про свою ідею — я відповім якнайшвидше.": "Tell me about your idea — I’ll reply as soon as possible.", "Ваше ім’я": "Your name", "Повідомлення": "Message", "Надіслати на пошту": "Send by email", "Скопіювати номер": "Copy number", "Залишити відгук": "Leave a review", "Відгуки": "Reviews", "Відгуків поки немає.": "No reviews yet.", "Усі →": "All →", "Що кажуть про мою роботу.": "What people say about my work.", "Відгуків поки немає. Станьте першим!": "No reviews yet. Be the first!", "Сайт": "Website", "Зображення": "Image", "Відео": "Video", "Файл": "File"};
+const EN={"Головна": "Home", "Роботи": "Works", "Про мене": "About", "Послуги": "Services", "Контакти": "Contacts", "Привіт, я": "Hi, I’m", "Дивитись роботи →": "View works →", "Замовити проєкт": "Order a project", "робіт": "works", "напрямів": "topics", "послуг": "services", "Обрані роботи": "Featured works", "Усі роботи →": "All works →", "Що я роблю": "What I do", "Докладніше →": "More →", "Відгуки клієнтів": "Client reviews", "Є ідея? Зробімо це разом.": "Got an idea? Let’s make it together.", "Написати мені": "Message me", "Скоро тут з’являться роботи.": "Works will appear here soon.", "Сайти, відео та файли — усе, що я створив.": "Websites, videos and files — everything I’ve made.", "Усі": "All", "Такої роботи не знайдено.": "Work not found.", "← До всіх робіт": "← Back to all works", "← Усі роботи": "← All works", "Відкрити сайт ↗": "Open site ↗", "Відкрити файл ↗": "Open file ↗", "Відкрити окремо ↗": "Open separately ↗", "Мої роботи →": "My works →", "Зв’язатися": "Get in touch", "Навички": "Skills", "Як я працюю": "How I work", "Потрібен сайт чи лендинг?": "Need a website or a landing page?", "Ім’я": "Name", "Чим займаюсь": "What I do", "Телефон": "Phone", "Робіт у портфоліо": "Works in portfolio", "Те, з чим я можу допомогти вашому проєкту.": "What I can help your project with.", "Обговорімо ваш проєкт": "Let’s discuss your project", "Розкажіть про свою ідею — я відповім якнайшвидше.": "Tell me about your idea — I’ll reply as soon as possible.", "Ваше ім’я": "Your name", "Повідомлення": "Message", "Надіслати на пошту": "Send by email", "Скопіювати номер": "Copy number", "Залишити відгук": "Leave a review", "Відгуки": "Reviews", "Відгуків поки немає.": "No reviews yet.", "Завантаження…": "Loading…", "Усі →": "All →", "Що кажуть про мою роботу.": "What people say about my work.", "Відгуків поки немає. Станьте першим!": "No reviews yet. Be the first!", "Сайт": "Website", "Зображення": "Image", "Відео": "Video", "Файл": "File"};
 function render(){
   const r=D.profile;
   if(L==='en')D.profile={...r,about:r.about_en||r.about,tagline:r.tagline_en||r.tagline,services:r.services_en||r.services};
@@ -301,33 +301,14 @@ const GH=!window.claude;  // на GitHub панель роботи не збер
 let adminKey='';try{adminKey=sessionStorage.getItem('ak')||''}catch{}
 const tt=(u,e)=>L==='en'?e:u;
 async function apiCall(o){const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(o)}),j=await r.json();if(!j.ok)throw new Error(j.error==='bad request'?'Google не впізнав команду («bad request»): сайт звертається до розгортання з адресою …'+API.slice(-9,-5)+', яке має стару версію коду':(j.error==='forbidden'?'Невірний пароль власника: натисніть «Вийти» і ввійдіть знову':(j.error||'error')));return j}
-async function loadReviews(){if(!API)return;try{const j=await (await fetch(API)).json();D.reviews=j.reviews||[];window.__w=!!j.works;if(j.works)D.works=j.works;render()}catch{}}
-addEventListener('hashchange',()=>{scrollTo(0,0);render()});
-function modal(html,big){
-  $('#ui').innerHTML=`<div class="ov" data-close="1"><div class="dlg${big?' big':''}">${html}</div></div>`;
+async function loadReviews(){if(!API)return;
+  try{
+    const j=await (await fetch(API)).json(),sig=JSON.stringify([j.reviews,j.works]),changed=sig!==window.__sig;
+    window.__ld=false;window.__w=!!j.works;D.reviews=j.reviews||[];if(j.works)D.works=j.works;
+    try{localStorage.setItem('vx_cache',JSON.stringify({r:D.reviews,w:j.works?D.works:null}));localStorage.setItem('vx_sig',sig)}catch{}
+    window.__sig=sig;if(changed||document.querySelector('.empty'))render();
+  }catch{window.__ld=false;if(document.querySelector('.empty'))render()}
 }
-const close=()=>{$('#ui').innerHTML=''};
-
-function embed(u){
-  let m=u.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/);
-  if(m)return `https://www.youtube-nocookie.com/embed/${m[1]}`;
-  m=u.match(/vimeo\.com\/(\d+)/);
-  return m?`https://player.vimeo.com/video/${m[1]}`:'';
-}
-function open(w){
-  const u=safe(w.url);
-  if(w.kind==='link'||w.kind==='file'){window.open(u,'_blank','noopener');return}
-  let inner='';
-  if(w.kind==='image')inner=`<img src="${esc(u)}" alt="${esc(w.title)}">`;
-  else if(w.up)inner=`<video src="${esc(u)}" controls autoplay playsinline></video>`;
-  else{const e=embed(w.url);inner=e?`<iframe src="${e}" allowfullscreen allow="autoplay; encrypted-media; picture-in-picture"></iframe>`:''}
-  modal(inner+`<div class="row"><a class="btn" href="${esc(u)}" target="_blank" rel="noopener">Відкрити окремо</a><button class="ghost" data-close="1">Закрити</button></div>`,true);
-}
-
-function loginForm(){modal(`<h2>Вхід для власника</h2><form id="l"><label>Пароль</label><input name="pw" type="password" autocomplete="current-password" required autofocus><div class="msg" id="msg"></div><div class="row"><button type="button" class="ghost" data-close="1">Скасувати</button><button type="submit">Увійти</button></div></form>`)}
-const revFormHtml=(id,title,note)=>`<h2>${title}</h2><p class="hint">${note}</p><form id="${id}"><label>1. ${tt('Ім’я','Name')} *</label><input name="nm" required maxlength="60" placeholder="${tt('Наприклад: Олена','For example: Olena')}"><label>2. ${tt('Хто це або звідки (необов’язково)','Who you are (optional)')}</label><input name="role" maxlength="80" placeholder="${tt('Наприклад: власниця кав’ярні','For example: café owner')}"><label>3. ${tt('Відгук про роботу','Your review')} *</label><textarea name="tx" rows="4" required maxlength="800" placeholder="${tt('Що сподобалось у співпраці?','What did you like about working together?')}"></textarea><input name="hp" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px"><div class="hint">${tt('Так це виглядатиме на сайті:','This is how it will look:')}</div><figure class="svc rev" id="pv"></figure><div class="msg" id="msg"></div><div class="row"><button type="button" class="ghost" data-close="1">${tt('Скасувати','Cancel')}</button><button type="submit">${tt('Надіслати','Send')}</button></div></form>`;
-function updPv(f){const p=$('#pv');if(p&&f)p.innerHTML=revInner({name:f.nm.value||tt('Ім’я','Name'),role:f.role.value,text:f.tx.value||tt('Тут буде текст відгуку','Review text will appear here')})}
-function revForm(){modal(revFormHtml('r','Новий відгук','Додайте відгук клієнта: ім’я, за бажанням хто це, і сам текст.'));updPv($('#r'))}
 function pubRevForm(){modal(revFormHtml('cr',tt('Залишити відгук','Leave a review'),API?tt('Відгук з’явиться на сайті одразу.','Your review will appear on the site right away.'):tt('Відгук відкриється в Telegram — просто натисніть «Надіслати».','Your review will open in Telegram — just press “Send”.')));updPv($('#cr'))}
 document.addEventListener('input',e=>{const f=e.target.form;if(f&&(f.id==='r'||f.id==='cr'))updPv(f)});
 function addForm(w){
@@ -484,7 +465,8 @@ function fx(){
 try{admin=sessionStorage.getItem('adm')==='1'}catch{}
 try{const t=localStorage.getItem('th');if(t)document.documentElement.dataset.theme=t}catch{}
 addEventListener('pointermove',e=>{const g=$('#glow');g.style.left=e.clientX+'px';g.style.top=e.clientY+'px'});
-render();loadReviews();
+try{const c=JSON.parse(localStorage.getItem('vx_cache')||'null');if(API&&c){D.reviews=c.r||[];if(c.w){D.works=c.w;window.__w=true}window.__sig=localStorage.getItem('vx_sig')}}catch{}
+window.__ld=!!API;render();loadReviews();
 (async()=>{
   try{
     if(!window.claude?.use)return;
