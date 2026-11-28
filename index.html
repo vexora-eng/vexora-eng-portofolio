@@ -338,7 +338,7 @@ function addForm(w){
   <label>Теги через кому (напр. лендинг, відео)</label><input name="tags" value="${esc((w.tags||[]).join(', '))}">
   <label>Тип роботи</label><select name="kind"><option value="link"${sel('link')}>Сайт (посилання)</option><option value="video"${sel('video')}>Відео (файл або YouTube/Vimeo)</option><option value="image"${sel('image')}>Зображення / скріншот</option><option value="file"${sel('file')}>Файл (PDF, архів тощо)</option></select>
   <label>Посилання (URL)</label><input name="url" placeholder="https://..." value="${esc(w.url||'')}">
-  ${GH?`<label>Обкладинка: виберіть картинку з пристрою${w.cover?' (вже є — залиште порожнім, щоб не міняти)':''}</label><input name="coverfile" type="file" accept="image/*"><label>…або вставте посилання на картинку (необов’язково)</label><input name="coverurl" placeholder="https://..." value="${esc(w.cover&&!w.cover.startsWith('data:')?w.cover:'')}">`:`<label>…або завантажте ${w.id?'новий ':''}файл (до 20 МБ)</label><input name="file" type="file">
+  ${GH?`${w.cover?`<div class="hint">Поточна обкладинка:</div><img src="${esc(simg(w.cover))}" alt="" style="max-width:100%;max-height:140px;border-radius:10px;display:block">`:''}<label>Обкладинка: виберіть картинку з пристрою${w.cover?' (вже є — залиште порожнім, щоб не міняти)':''}</label><input name="coverfile" type="file" accept="image/*"><label>…або вставте посилання на картинку (необов’язково)</label><input name="coverurl" placeholder="https://..." value="${esc(w.cover&&!w.cover.startsWith('data:')?w.cover:'')}">`:`<label>…або завантажте ${w.id?'новий ':''}файл (до 20 МБ)</label><input name="file" type="file">
   <label>Обкладинка (необов’язково, зображення)${w.cover?' — вже є, залиште порожнім, щоб не міняти':''}</label><input name="cover" type="file" accept="image/*">`}
   <div class="msg" id="msg"></div>
   <div class="row"><button type="button" class="ghost" data-close="1">Скасувати</button><button type="submit">Зберегти</button></div></form>`);
@@ -448,7 +448,10 @@ document.addEventListener('submit',async e=>{
         let cover=v.coverurl.value.trim();if(v.coverfile.files[0]){say('Стискаю зображення…');cover=await shrink(v.coverfile.files[0])}else if(!cover&&ed)cover=ed.cover||'';
         const o={title:v.title.value.trim(),desc:v.desc.value.trim(),tags:v.tags.value.split(',').map(x=>x.trim()).filter(Boolean),kind:v.kind.value,url,cover};
         say('Збереження…');const r=await apiCall({action:ed?'workUpdate':'workAdd',key:adminKey,id:ed?ed.id:'',work:o});
-        D.works=r.works;close();render();return;
+        D.works=r.works;close();render();
+        const sv=ed?r.works.find(x=>x.id===ed.id):r.works[0];
+        if(cover&&sv&&(sv.cover||'').length<cover.length)toast('Роботу збережено, але Google обрізав обкладинку: у вашому коді Google ще стара версія (ліміт 500 символів). Вставте оновлений код і створіть «Новое развертывание».');
+        return;
       }
       let url=v.url.value.trim(),isUp=ed&&url===ed.url?ed.up:false,cover=ed?ed.cover:'';
       if(url&&!/^(https?:\/\/|\/_blob\/)/i.test(url))url='https://'+url;
