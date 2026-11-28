@@ -206,12 +206,14 @@ const toast=m=>modal('<p>'+esc(m)+'</p><div class="row"><button data-close="1">O
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const safe=u=>/^(https?:\/\/|\/_blob\/|mailto:)/i.test(u||'')?u:'#';
+const simg=u=>/^data:image\/(jpeg|png|webp);base64,/i.test(u||'')?u:safe(u);
+function shrink(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{URL.revokeObjectURL(u);for(const w of [720,640,560,480,400,320])for(const q of [.8,.7,.6,.5,.4]){const sc=Math.min(1,w/img.width),c=document.createElement('canvas');c.width=Math.round(img.width*sc);c.height=Math.round(img.height*sc);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);const d=c.toDataURL('image/jpeg',q);if(d.length<45000)return res(d)}rej(new Error('Зображення завелике, оберіть інше'))};img.onerror=()=>rej(new Error('Не вдалось прочитати зображення'));img.src=u})}
 const host=u=>{try{return new URL(u).hostname.replace(/^www\./,'')}catch{return ''}};
 const KIND={link:['🌐','Сайт'],image:['🖼️','Зображення'],video:['🎬','Відео'],file:['📄','Файл']};
 let admin=false,assets=null,art=null,flt='';
 
 function thumb(w){
-  if(w.cover)return `<img src="${esc(safe(w.cover))}" alt="" loading="lazy">`;
+  if(w.cover)return `<img src="${esc(simg(w.cover))}" alt="" loading="lazy">`;
   if(w.kind==='image')return `<img src="${esc(safe(w.url))}" alt="" loading="lazy">`;
   if(w.kind==='video'&&w.up)return `<video src="${esc(safe(w.url))}#t=0.5" preload="metadata" muted playsinline></video>`;
   return `<div class="ph"><b>${KIND[w.kind][0]}</b><small>${esc(host(w.url)||w.title)}</small></div>`;
@@ -336,7 +338,7 @@ function addForm(w){
   <label>Теги через кому (напр. лендинг, відео)</label><input name="tags" value="${esc((w.tags||[]).join(', '))}">
   <label>Тип роботи</label><select name="kind"><option value="link"${sel('link')}>Сайт (посилання)</option><option value="video"${sel('video')}>Відео (файл або YouTube/Vimeo)</option><option value="image"${sel('image')}>Зображення / скріншот</option><option value="file"${sel('file')}>Файл (PDF, архів тощо)</option></select>
   <label>Посилання (URL)</label><input name="url" placeholder="https://..." value="${esc(w.url||'')}">
-  ${GH?`<label>Обкладинка: посилання на картинку (необов’язково)</label><input name="coverurl" placeholder="https://..." value="${esc(w.cover||'')}">`:`<label>…або завантажте ${w.id?'новий ':''}файл (до 20 МБ)</label><input name="file" type="file">
+  ${GH?`<label>Обкладинка: виберіть картинку з пристрою${w.cover?' (вже є — залиште порожнім, щоб не міняти)':''}</label><input name="coverfile" type="file" accept="image/*"><label>…або вставте посилання на картинку (необов’язково)</label><input name="coverurl" placeholder="https://..." value="${esc(w.cover&&!w.cover.startsWith('data:')?w.cover:'')}">`:`<label>…або завантажте ${w.id?'новий ':''}файл (до 20 МБ)</label><input name="file" type="file">
   <label>Обкладинка (необов’язково, зображення)${w.cover?' — вже є, залиште порожнім, щоб не міняти':''}</label><input name="cover" type="file" accept="image/*">`}
   <div class="msg" id="msg"></div>
   <div class="row"><button type="button" class="ghost" data-close="1">Скасувати</button><button type="submit">Зберегти</button></div></form>`);
@@ -443,7 +445,8 @@ document.addEventListener('submit',async e=>{
       if(API&&GH){
         let url=v.url.value.trim();if(url&&!/^https?:\/\//i.test(url))url='https://'+url;
         if(!url)throw new Error('Вкажіть посилання');
-        const o={title:v.title.value.trim(),desc:v.desc.value.trim(),tags:v.tags.value.split(',').map(x=>x.trim()).filter(Boolean),kind:v.kind.value,url,cover:v.coverurl.value.trim()};
+        let cover=v.coverurl.value.trim();if(v.coverfile.files[0]){say('Стискаю зображення…');cover=await shrink(v.coverfile.files[0])}else if(!cover&&ed)cover=ed.cover||'';
+        const o={title:v.title.value.trim(),desc:v.desc.value.trim(),tags:v.tags.value.split(',').map(x=>x.trim()).filter(Boolean),kind:v.kind.value,url,cover};
         say('Збереження…');const r=await apiCall({action:ed?'workUpdate':'workAdd',key:adminKey,id:ed?ed.id:'',work:o});
         D.works=r.works;close();render();return;
       }
